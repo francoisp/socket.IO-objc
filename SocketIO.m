@@ -291,6 +291,7 @@ NSString* const SocketIOException = @"SocketIOException";
     if (function) {
         packet.ack = @"data";
     }
+	NSLog(@"%@", packet.data);
     [self send:packet];
 }
 
@@ -338,7 +339,7 @@ NSString* const SocketIOException = @"SocketIOException";
         return;
     }
     DEBUGLOG(@"Prepare to send()");
-    
+    packet.endpoint = _endpoint;
     
     NSString *req = [packet toString];
     if (![_transport isReady]) {
@@ -686,10 +687,10 @@ NSString* const SocketIOException = @"SocketIOException";
                     //??
                     break;
                 case 2:
-                {
+				
                     //Ping->Pong
                     [self sendMessage:[NSString stringWithFormat:@"3:%@", data]];
-                }    break;
+                    break;
                 case 3:
                     //Pong
                     if([data isEqualToString:@"probe"])
@@ -700,15 +701,18 @@ NSString* const SocketIOException = @"SocketIOException";
                     //Message
                     control = [[NSNumber numberWithUnsignedChar:[packet.data characterAtIndex:0]] integerValue]
                                                     -[[NSNumber numberWithUnsignedChar:'0'] integerValue];
+				/*
                     if([packet.data length] > 1){
                         NSRange range = NSMakeRange(1, [packet.data rangeOfString:@"["].location-1);
                         NSString *ackStr = [packet.data substringWithRange:range];
                         ack = [ackStr integerValue];
                     }
+				 */
+				packet.data = [packet.data substringFromIndex:1];
                     //GET ENDPOINT
                     NSUInteger rendpoint = [packet.data rangeOfString:@"["].location;
                     if(rendpoint == NSNotFound)
-                        packet.endpoint = @"";
+                        packet.endpoint = packet.data;
                     else
                         packet.endpoint = [packet.data substringToIndex:rendpoint];
                     
