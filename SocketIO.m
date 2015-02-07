@@ -91,6 +91,7 @@ NSString* const SocketIOException = @"SocketIOException";
         _ackCount = 0;
         _acks = [[NSMutableDictionary alloc] init];
         _returnAllDataFromAck = NO;
+        _path=@"";
     }
     return self;
 }
