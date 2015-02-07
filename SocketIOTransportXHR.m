@@ -29,10 +29,10 @@
 #define DEBUGLOG(...)
 #endif
 
-static NSString* kInsecureXHRURL = @"http://%@/socket.io/1/xhr-polling/%@";
-static NSString* kSecureXHRURL = @"https://%@/socket.io/1/xhr-polling/%@";
-static NSString* kInsecureXHRPortURL = @"http://%@:%d/socket.io/1/xhr-polling/%@";
-static NSString* kSecureXHRPortURL = @"https://%@:%d/socket.io/1/xhr-polling/%@";
+static NSString* kInsecureXHRURL = @"http://%@%@/socket.io/1/xhr-polling/%@";
+static NSString* kSecureXHRURL = @"https://%@%@/socket.io/1/xhr-polling/%@";
+static NSString* kInsecureXHRPortURL = @"http://%@:%d%@/socket.io/1/xhr-polling/%@";
+static NSString* kSecureXHRPortURL = @"https://%@:%d%@/socket.io/1/xhr-polling/%@";
 
 @interface SocketIOTransportXHR (Private)
 - (void) checkAndStartPoll;
@@ -67,11 +67,11 @@ static NSString* kSecureXHRPortURL = @"https://%@:%d/socket.io/1/xhr-polling/%@"
     NSString *format;
     if (delegate.port) {
         format = delegate.useSecure ? kSecureXHRPortURL : kInsecureXHRPortURL;
-        _url = [NSString stringWithFormat:format, delegate.host, delegate.port, delegate.sid];
+        _url = [NSString stringWithFormat:format, delegate.host, delegate.port, delegate.path, delegate.sid];
     }
     else {
         format = delegate.useSecure ? kSecureXHRURL : kInsecureXHRURL;
-        _url = [NSString stringWithFormat:format, delegate.host, delegate.sid];
+        _url = [NSString stringWithFormat:format, delegate.host, delegate.path, delegate.sid];
     }
     DEBUGLOG(@"Opening XHR @ %@", _url);
     [self poll:nil];
