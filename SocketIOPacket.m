@@ -81,8 +81,15 @@
     NSNumber *typeAsNumber = [self typeAsNumber];
     NSMutableArray *encoded = [NSMutableArray arrayWithObject:typeAsNumber];
     
-    NSNumber *typeNumber = [self typeAsNumber];
-    if (!(self.endpoint == nil || [@"/" isEqualToString:self.endpoint]) && [typeNumber intValue] != 6 && [typeNumber intValue] != 2)
+    //BOOL typeIsDisconnect = [typeAsNumber intValue] == 0;
+    BOOL typeIsHeartbeat = [typeAsNumber intValue] == 2;
+    BOOL typeIsAck = [typeAsNumber intValue] == 6;
+    
+    BOOL endpointIsEmpty = ! [self.endpoint length];
+    BOOL endpointIsRoot = [@"/" isEqualToString:self.endpoint];
+    BOOL endpointIsDefault = endpointIsEmpty || endpointIsRoot;
+    
+    if (! (endpointIsDefault || typeIsHeartbeat || typeIsAck))
     {
         [encoded addObject:[self.endpoint stringByAppendingString:@","]];
     } 
@@ -97,19 +104,19 @@
         }
     } else {
         // Engine.IO 1.0 expects payload with the ping packet
-        if ([typeAsNumber intValue] == 2) {
+        if (typeIsHeartbeat) {
             [encoded addObject:@"probe"];
         }
     }
     
     // Do not write pid for acknowledgements
-    if ([typeNumber intValue] != 6) {
+    if (! typeIsAck) {
         [encoded addObject:pIdL];
     }
     
     // Add the end point for the namespace to be used, as long as it is not
     // an ACK, heartbeat, or disconnect packet
-    /*if ([type intValue] != 6 && [type intValue] != 2 && [type intValue] != 0) {
+    /*if (! (typeIsHeartbeat || typeIsAck || typeIsDisconnect)) {
         [encoded addObject:endpoint];
     }
     else {
@@ -120,7 +127,7 @@
     {
         NSString *ackpId = @"";
         // This is an acknowledgement packet, so, prepend the ack pid to the data
-        if ([typeNumber intValue] == 6)
+        if (typeIsAck)
         {
             if( !([self isKindOfClass:[SocketIOPacketV10x class]]) )
                 ackpId = [NSString stringWithFormat:@":%@%@", pIdL, @"+"];
